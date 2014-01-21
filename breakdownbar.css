@@ -1,0 +1,85 @@
+.breakdownbar-container {
+    position: relative;
+    top: 0px;
+    left: 0px;
+
+    display: block;
+    min-height: 25px;
+
+    box-shadow: 0 0 10px #a9a9a9 inset;
+
+    border-radius: 4px;
+}
+
+.breakdownbar-container .breakdownbar-part {
+    display: inline-block;
+    height: 25px;
+
+    color: white;
+    background-color: #257397;
+
+    font-size: 14px;
+    text-align: center;
+
+    box-shadow: -1px -1px 0 rgba(0,0,0, 0.15) inset;
+
+    transition: all 0.25s;
+}
+
+.breakdownbar-container .breakdownbar-label {
+    position: absolute;
+    top: 2px;
+    display: inline;
+
+    height: 20px;
+    line-height: 22px;
+    min-width: 40px;
+
+    margin-left: -20px;
+
+    font-size: 75%;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    border-radius: 5px;
+
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0, 0.5);
+    background-color: rgba(0,0,0, 0.5);
+
+    opacity: 1;
+    transition: all 0.25s;
+
+    pointer-events: none;
+
+    z-index: +10;
+}
+
+.breakdownbar-container:hover > .breakdownbar-label,
+.breakdownbar-container .breakdownbar-part .breakdownbar-label {
+    opacity: 0;
+}
+
+.breakdownbar-container:hover .breakdownbar-part .breakdownbar-label {
+    opacity: 1;
+}
+
+.breakdownbar-container:hover .breakdownbar-part {
+    opacity: 0.85;
+}
+
+.breakdownbar-container .breakdownbar-part:hover {
+    opacity: 1;
+    z-index: 5;
+    box-shadow: 0 0 10px #555, -1px -1px 0 rgba(0,0,0, 0.15) inset;
+}
+
+.breakdownbar-container .breakdownbar-part:last-of-type { border-radius: 0px 4px 4px 0px; }
+.breakdownbar-container .breakdownbar-part:first-of-type { border-radius: 4px 0px 0px 4px; }
+
+.breakdownbar-container .breakdownbar-part.red { background: red; }
+.breakdownbar-container .breakdownbar-part.green { background: green; }
+.breakdownbar-container .breakdownbar-part.yellow { background: yellow; }
