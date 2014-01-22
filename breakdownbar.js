@@ -1,73 +1,130 @@
 define([
-    'underscore',
-    'jquery'
+	'underscore',
+	'jquery'
 ], function(_,$,template) {
 
-    var BreakdownBar = function(opts) {
-        this.opts = _.defaults(opts, {
-            parts: [],
+	var BreakdownBar = function(opts) {
+		this.opts = _.defaults(opts, {
+			parts: [],
 
-            tagName: 'div',
-            className: 'breakdownbar-container',
+			tagName: 'div',
+			className: 'breakdownbar-container',
 
-            partTagName: 'div',
-            partClassName: 'breakdownbar-part',
+			partTagName: 'div',
+			partClassName: 'breakdownbar-part',
 
-            labelTagName: 'div',
-            labelClassName: 'breakdownbar-label',
+			labelTagName: 'div',
+			labelClassName: 'breakdownbar-label',
 
-            $el: undefined
-        });
+			hidePartsBelow: 5,
 
-        this.parts = this.opts.parts;
+			popoverOpts: {
+				trigger: 'hover',
+				placement: 'bottom',
+				container: 'body',
 
-        this.render = function() {
-            if(this.$el === undefined) {
-                this.$el = $('<'+this.opts.tagName+'></'+this.opts.tagName+'>');
-                this.$el.addClass(this.opts.className);
+				html: true,
+				title: undefined,
+				content: undefined
+			},
 
-                this.$label = $('<'+this.opts.labelTagName+'></'+this.opts.labelTagName+'>');
-                this.$label.addClass(this.opts.labelClassName);
-                this.$el.append(this.$label);
-            }
+			$el: undefined
+		});
 
-            var total = 0;
+		this.parts = this.opts.parts;
 
-            for(var i in this.parts) {
-                var p = this.parts[i];
+		this.render = function() {
+			if(this.$el === undefined) {
+				this.$el = $('<'+this.opts.tagName+'></'+this.opts.tagName+'>');
+				this.$el.addClass(this.opts.className);
 
-                var partWidth = p.width instanceof Function ? p.width() : p.width;
-                var partClass = this.opts.partClassName;
-                if(p.partClass !== undefined)
-                    partClass += ' ' + (p.partClass instanceof Function ? p.partClass() : p.partClass);
+				this.$label = $('<'+this.opts.labelTagName+'></'+this.opts.labelTagName+'>');
+				this.$label.addClass(this.opts.labelClassName);
+				this.$el.append(this.$label);
+			}
 
-                total += partWidth;
+			var totalWeight = 0;
+			var totalProgress = 0;
 
-                if(p.uid === undefined) {
-                    p.uid = _.uniqueId('breakdownbar-part-');
-                }
+			for(var i in this.parts) {
+				var p = this.parts[i];
+				if(p.weight === undefined)
+					p.weight = 1;
+				totalWeight += parseInt(_.result(p, 'weight'));
+			}
 
-                if(p.$el === undefined) {
-                    p.$el = $('<'+this.opts.partTagName+'></'+this.opts.partTagName+'>');
-                    p.$el.attr('id', p.uid);
+			for(var i in this.parts) {
+				var p = this.parts[i];
 
-                    p.label = $('<'+this.opts.labelTagName+'></'+this.opts.labelTagName+'>');
-                    p.label.addClass(this.opts.labelClassName);
-                    p.$el.append(p.label);
+				var partClass = this.opts.partClassName;
+				var partWeight = parseInt(_.result(p, 'weight'));
+				var partProgress = parseInt(_.result(p, 'progress'));
 
-                    this.$el.prepend(p.$el);
-                }
+				var partAttributes = _.result(p, 'attributes');
 
-                p.$el.css('width', partWidth + '%');
-                p.$el.attr('class', partClass);
-                p.label.text(partWidth.toFixed() + '%');
-            }
+				var width = (partWeight / totalWeight) * partProgress;
+				totalProgress += width;
 
-            this.$label.css('left', (total/2)+'%').text(total.toFixed()+'%');
+				if(p.uid === undefined) {
+					p.uid = _.uniqueId('breakdownbar-part-');
+				}
 
-            return this;
-        };
-    };
+				if(p.$el === undefined) {
+					p.$el = $('<'+this.opts.partTagName+'></'+this.opts.partTagName+'>');
+					p.$el.attr('id', p.uid);
 
-    return BreakdownBar;
+					p.label = $('<'+this.opts.labelTagName+'></'+this.opts.labelTagName+'>');
+					p.label.addClass(this.opts.labelClassName);
+					p.$el.append(p.label);
+
+					this.$el.prepend(p.$el);
+				}
+
+
+				if(partAttributes !== undefined) {
+					_.keys(partAttributes).forEach(function(attribute) {
+						var value = partAttributes[attribute];
+						if( value instanceof Function )
+							value = value.apply(p);
+						p.$el.attr(attribute, value);
+
+						if(attribute === "class")
+							partClass += ' '+value;
+					});
+				}
+
+				//optional support for Bootstrap popovers
+				//requires Bootstrap tooltip and popover js, as well as relevant css
+				if(p.popover !== undefined) {
+					var popoverOpts = this.opts.popoverOpts;
+					var popover = _.result(p, 'popover');
+					_.keys(popover).forEach(function(key) {
+						popoverOpts[key] = popover[key];
+					});
+					p.$el.popover(popoverOpts);
+				}
+
+				p.$el.attr('class', partClass);
+
+				width = parseInt(width.toFixed());
+				p.$el.css('width', width + '%');
+				p.label.text(partProgress.toFixed() + '%');
+
+				if( width < this.opts.hidePartsBelow ) {
+					p.$el.css('display: none');
+					p.$el.addClass('hide');
+				}
+				else {
+					p.$el.css('display: inline-block');
+					p.$el.removeClass('hide');
+				}
+			}
+
+			this.$label.css('left', (totalProgress/2)+'%').text(totalProgress.toFixed()+'%');
+
+			return this;
+		};
+	};
+
+	return BreakdownBar;
 });
