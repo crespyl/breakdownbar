@@ -16,6 +16,13 @@ define([
 			labelTagName: 'div',
 			labelClassName: 'breakdownbar-label',
 
+			progressClassMap: {
+				25: 'red',
+				75: 'yellow',
+				95: 'green',
+				100: 'gold'
+			},
+
 			hidePartsBelow: 5,
 
 			popoverOpts: {
@@ -120,6 +127,12 @@ define([
 				}
 			}
 
+			for( var i in this.opts.progressClassMap ) {
+				if( parseInt(i) >= totalProgress ) {
+					this.$el.attr('class', this.opts.className+' '+this.opts.progressClassMap[i]);
+					break;
+				}
+			}
 			this.$label.css('left', (totalProgress/2)+'%').text(totalProgress.toFixed()+'%');
 
 			return this;
